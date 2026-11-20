@@ -1,0 +1,58 @@
+name: Backend CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-only-secret-key
+      DATABASE_URL: sqlite:///ci.sqlite3   # settings.base needs it to exist; tests use their own DB
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Check migrations are in sync
+        run: python manage.py makemigrations --check --dry-run --settings=config.settings.test
+      - name: Run tests
+        run: python manage.py test --settings=config.settings.test
+
+  deploy:
+    name: Migrate + deploy to Vercel
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: production-deploy        # one production deploy at a time
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Apply database migrations (Neon)
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}   # use the DIRECT (non-pooled) Neon URL here
+        run: python manage.py migrate --noinput
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Deploy to production
+        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}

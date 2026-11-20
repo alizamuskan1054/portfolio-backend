@@ -1,0 +1,8 @@
+.venv
+venv
+logs
+tmp_pdfs
+tests
+db.sqlite3
+.env
+__pycache__

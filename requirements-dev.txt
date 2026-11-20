@@ -1,0 +1,3 @@
+# Local development: everything in requirements.txt plus the PDF generator (not used on Vercel)
+-r requirements.txt
+playwright>=1.40.0

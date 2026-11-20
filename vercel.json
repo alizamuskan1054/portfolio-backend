@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": false
+  },
+  "functions": {
+    "config/wsgi.py": {
+      "maxDuration": 30,
+      "excludeFiles": "{tests/**,apps/**/tests/**,logs/**,tmp_pdfs/**,.venv/**,venv/**}"
+    }
+  }
+}

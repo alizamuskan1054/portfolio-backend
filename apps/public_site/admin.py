@@ -1,0 +1,1 @@
+# Public site app does not have its own database models or admin panel.
