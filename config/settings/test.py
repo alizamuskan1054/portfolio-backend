@@ -28,7 +28,14 @@ DEFAULT_FROM_EMAIL = "no-reply@test.local"
 
 # Never talk to Cloudinary from tests.
 CLOUDINARY_STORAGE = {"CLOUD_NAME": "test", "API_KEY": "test", "API_SECRET": "test"}
-DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 MEDIA_ROOT = tempfile.mkdtemp(prefix="portfolio_test_media_")
 
 # Rate limits would make unrelated tests flaky; throttle config is asserted separately.
