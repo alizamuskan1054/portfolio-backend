@@ -8,3 +8,4 @@ python-decouple>=3.8
 psycopg2-binary>=2.9.9
 cloudinary>=1.40.0
 django-cloudinary-storage>=0.3.0
+Pillow
